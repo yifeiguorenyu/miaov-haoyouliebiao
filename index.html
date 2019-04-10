@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Document</title>
+    <script src="js/react.development.js"></script>
+    <script src="js/react-dom.development.js"></script>
+    <script src="js/babel.min.js"></script>
+    <script src="js/data.js"></script>
+    <style>
+      .panel {
+        border: 1px solid #000;
+        width: 600px;
+      }
+      .title {
+        margin: 0;
+        padding: 10px;
+        background: #ccc;
+      }
+      p.vip {
+        color: red;
+      }
+      p.message {
+        color: #aaa;
+      }
+      .listWrap {
+        height: 0;
+        overflow: hidden;
+        transition: 0.5s;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <!--
+        引入文件
+        jsx js + xml
+        component 组件
+        props
+        state
+    -->
+    <script type="text/babel">
+      class List extends React.Component {
+        render() {
+          return (
+            <ul>
+              {this.props.list.map(item => {
+                return (
+                  <li key={item.username}>
+                    <p className="vip">{item.username}</p>
+                    <p className="message">{item.message}</p>
+                  </li>
+                );
+              })}
+            </ul>
+          );
+        }
+      }
+
+      class Item extends React.Component {
+        constructor() {
+          super(...arguments);
+          this.state = {
+            show: this.props.show
+          };
+        }
+
+        changeList = () => {
+          let show = !this.state.show;
+          this.setState({
+            show
+          });
+          if (show) {
+            this.props.onChange(this.props.index);
+          }
+        };
+
+        showList(show) {
+          var list = this.refs.list;
+          if (show) {
+            list.style.height = list.scrollHeight + "px";
+          } else {
+            list.style.height = 0;
+          }
+        }
+        componentDidMount() {
+          this.showList(this.state.show);
+        }
+
+        shouldComponentUpdate(nextProps, nextState, nextContext) {
+          if (nextProps.show != this.state.show) {
+            this.setState({
+              show: nextProps.show
+            });
+          }
+          if (this.state.show != nextState.show) {
+            this.showList(nextState.show);
+          }
+
+          return true;
+        }
+        render() {
+          let { data } = this.props;
+          let { name, list } = data;
+          return (
+            <div key={name}>
+              <h2 className="title" onClick={this.changeList}>
+                {name}
+              </h2>
+              <div className="listWrap" ref="list">
+                <List list={list} />
+              </div>
+            </div>
+          );
+        }
+      }
+
+      class Penel extends React.Component {
+        constructor() {
+          super(...arguments);
+          this.state = {
+            showList: [true, false, false]
+          };
+        }
+        changeList = index => {
+          let showList = this.state.showList.map((item, i) => {
+            if (i == index) {
+              return true;
+            }
+            return false;
+          });
+          this.setState({
+            showList
+          });
+        };
+        setShow() {
+          var list = Object.keys(dataList).map((item, index) => {
+            return (
+              <Item
+                data={dataList[item]}
+                key={index}
+                show={this.state.showList[index]}
+                onChange={this.changeList}
+                index={index}
+              />
+            );
+          });
+
+          return list;
+        }
+        render() {
+          return <div className="panel">{this.setShow()}</div>;
+        }
+      }
+
+      ReactDOM.render(<Penel />, document.getElementById("app"));
+    </script>
+  </body>
+</html>
